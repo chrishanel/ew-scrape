@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/3538143/132111041-b724fdaf-ceb1-45ee-9f64-623a68030b94.png)
+
 # Effectively Wild Wiki Scraper
 Chrome extension to take data from EWPod episode pages and format them in your clipboard to paste on Fandom.
 
