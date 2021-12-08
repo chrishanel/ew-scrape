@@ -97,38 +97,43 @@ var scrapeEpisodeData=function(){
       }
     });
 
-    clipboardText = "{{#vardefine:downloadlink|" + directLink + "}}\n\n";
-    clipboardText += "==Date==\n" + episodeDate + "\n\n==Summary==\n\'\'";
+    clipboardText = "__NOTOC__";
+    clipboardText += "{{Episode Infobox\n\n";
+    clipboardText += "| epnumber=\n\n"; //TO DO: ADD NUMBER
+    clipboardText += "| title1=\n\n"; //TO DO: ADD TITLE
+    clipboardText += "| infopage=" + window.location.href + "\n\n";
+    clipboardText += "| mp3download=" + directLink + "\n\n";
+    clipboardText += "| date=" + episodeDate + "\n\n";
+    clipboardText += "| duration=\n\n"; //TO DO: ADD DURATION
+    clipboardText += "| hosts=\n\n"; //TO DO: ADD HOSTS
+    clipboardText += "| intro=[" + audioIntroLink + " " + audioIntro + "]\n\n";
+    //interstitials are funky
+    if (audioInter.length > 0) {
+      clipboardText += "| interstitials=";
+      jQuery.each(audioInter, function( index ) {
+        clipboardText += "[" + audioInterLinks[index] + " ";
+        clipboardText += this + "]<br>";
+      });
+      clipboardText += "\n\n";
+    }
+    clipboardText += "| outro=[" + audioOutroLink + " " + audioOutro + "]\n\n}}";
+    clipboardText += "{{#vardefine:downloadlink|" + directLink + "}}";
+    clipboardText += "{{IncompleteNotice}}\n";
+    clipboardText += "==Summary==\n\'\'";
     clipboardText += descriptionCollect + "\'\'\n\n";
     clipboardText += "==Topics==\n* {List or summarize the main topics, noting " +
                   "prominently mentioned players or teams and making internal " +
                   "wiki links to them (even if those pages have not been created " +
-                  "yet).} \n\n==Intro==\n";
-    clipboardText += "[" + audioIntroLink + " ";
-    clipboardText += audioIntro + "]";
-
-    if (audioInter.length > 0) {
-      let interHeader = audioInter.length > 1 ?
-        "\n\n==Interstitials==\n" : "\n\n==Interstitial==\n";
-      clipboardText += interHeader;
-      jQuery.each(audioInter, function( index ) {
-        clipboardText += "[" + audioInterLinks[index] + " ";
-        clipboardText += this + "]\n";
-      });
-      clipboardText += "\n";
-    } else {
-      clipboardText += "\n\n";
-    }
-
-    clipboardText += "==Outro==\n[" + audioOutroLink + " " + audioOutro + "]\n\n";
-    clipboardText += "==Banter==\n{- If applicable.\n- For banter, note " +
+                  "yet).} \n\n";
+    clipboardText += "==Banter==\n* {- If applicable. For banter, note " +
                   "prominent teams and players, and make internal links for " +
                   "them.\n- Links and mentions do NOT have to be made for " +
                   "players and teams mentioned in passing.}\n\n" +
-                  "==Email Questions==\n* {For EMAIL episodes: note the " +
-                  "question asker, transcribe the question, and link " +
+                  "==Email Questions==\n* {For EMAIL episodes: copy the " +
+                  "question and who asked it from the [https://docs.google.com/spreadsheets/d/1-8lpspHQuR5GK7S_nNtGunLGrx60QnSa8XLG_wvRb4Q/edit#gid=0" +
+                  " question database], and link " +
                   "prominent teams and players.}\n\n" +
-                  "==Stat Blast==\n{For STAT BLAST segment: " +
+                  "==Stat Blast==\n* {For STAT BLAST segment: " +
                   "transcribe the scenario that the host is trying " +
                   "to answer (you do NOT have to transcribe the method used " +
                   "within the Stat Blast, but note its findings and andy other " +
@@ -139,6 +144,9 @@ var scrapeEpisodeData=function(){
     jQuery.each(linkCollect, function( index ) {
       clipboardText += this;
     });
+    clipboardText += "[[Category:Episodes]]\n[[Category:Incomplete Episode Page]]\n";
+    clipboardText += "[[Category:Ben Lindbergh Episodes]]\n[[Category:Meg Rowley Episodes]]\n";
+    clipboardText += "{{DEFAULTSORT: Episode 0XXXX}}";
 
     const ta = document.createElement('textarea');
     ta.style.cssText = 'opacity:0; position:fixed; width:1px; height:1px; top:0; left:0;';
