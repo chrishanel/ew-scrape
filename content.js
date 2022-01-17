@@ -23,6 +23,9 @@ var scrapeEpisodeData=function(){
     episodeTitle = titleDiv.text();
     let epLinkText = "*[" + window.location.href + " " + episodeTitle + "]\n"
     linkCollect.push(epLinkText);
+    
+    let epNumber = episodeTitle.substring(episodeTitle.indexOf("Episode") + 8, episodeTitle.indexOf(":"));
+    let epTitle = episodeTitle.substring(episodeTitle.indexOf(":") + 2);
 
     //direct download to mp3
     directLink = $('.powerpress_link_d').attr('href');
@@ -99,8 +102,8 @@ var scrapeEpisodeData=function(){
 
     clipboardText = "__NOTOC__";
     clipboardText += "{{Episode Infobox\n\n";
-    clipboardText += "| epnumber=" + episodeTitle.substring(episodeTitle.indexOf("Episode") + 8, episodeTitle.indexOf(":")) + "\n\n";
-    clipboardText += "| title1=" + episodeTitle.substring(episodeTitle.indexOf(":") + 2) + "\n\n";
+    clipboardText += "| epnumber=" + epNumber + "\n\n";
+    clipboardText += "| title1=" + epTitle + "\n\n";
     clipboardText += "| infopage=" + window.location.href + "\n\n";
     clipboardText += "| mp3download=" + directLink + "\n\n";
     clipboardText += "| date=" + episodeDate + "\n\n";
@@ -146,7 +149,8 @@ var scrapeEpisodeData=function(){
     });
     clipboardText += "[[Category:Episodes]]\n[[Category:Incomplete Episode Page]]\n";
     clipboardText += "[[Category:Ben Lindbergh Episodes]]\n[[Category:Meg Rowley Episodes]]\n";
-    clipboardText += "{{DEFAULTSORT: Episode 0XXXX}}";
+    clipboardText += "[[Category: " + episodeDate.substring(episodeDate.length - 4) + " Episodes]]\n";
+    clipboardText += "{{DEFAULTSORT: Episode 0" + epNumber + "}}";
 
     const ta = document.createElement('textarea');
     ta.style.cssText = 'opacity:0; position:fixed; width:1px; height:1px; top:0; left:0;';
