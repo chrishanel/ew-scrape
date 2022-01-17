@@ -52,24 +52,18 @@ var scrapeEpisodeData=function(){
 
       else if ( textChecker.startsWith("Audio", 0)) {
         let lines = textChecker.split("\n");
-        jQuery.each(lines, function( index ) {
-            if (index == 0) {
-              audioIntro = this.substring(13);
+        lines.forEach(function(line) {
+            var lower = line.toLowerCase();
+            var data = line.substring(line.indexOf(":" + 2);
+            if (lower.includes("intro")) {
+              audioIntro = data;
             }
-
             //outro is always last one
-            else if (index == lines.length - 1) {
-              audioOutro = this.substring(13);
-            }
-
-            // interstitial if there's only one
-            else if (lines.length < 4) {
-              audioInter.push(this.substring(20));
-            }
-
-            //interstitials when there's multiple
-            else {
-              audioInter.push(this.substring(22));
+            else if (lower.includes("outro")) {
+              audioOutro = data;
+              return;
+            } else {
+              audioInter.push(data);
             }
         });
       }
