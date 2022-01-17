@@ -99,8 +99,8 @@ var scrapeEpisodeData=function(){
 
     clipboardText = "__NOTOC__";
     clipboardText += "{{Episode Infobox\n\n";
-    clipboardText += "| epnumber=\n\n"; //TO DO: ADD NUMBER
-    clipboardText += "| title1=\n\n"; //TO DO: ADD TITLE
+    clipboardText += "| epnumber=" + episodeTitle.substring(episodeTitle.indexOf("Episode") + 8, episodeTitle.indexOf(":")) + "\n\n";
+    clipboardText += "| title1=" + episodeTitle.substring(episodeTitle.indexOf(":") + 2) + "\n\n";
     clipboardText += "| infopage=" + window.location.href + "\n\n";
     clipboardText += "| mp3download=" + directLink + "\n\n";
     clipboardText += "| date=" + episodeDate + "\n\n";
