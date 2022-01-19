@@ -25,7 +25,6 @@ var scrapeEpisodeData=function(){
     linkCollect.push(epLinkText);
     
     let epNumber = episodeTitle.substring(episodeTitle.indexOf("Episode") + 8, episodeTitle.indexOf(":"));
-    let epTitle = episodeTitle.substring(episodeTitle.indexOf(":") + 2);
 
     //direct download to mp3
     directLink = $('.powerpress_link_d').attr('href');
@@ -55,19 +54,21 @@ var scrapeEpisodeData=function(){
 
       else if ( textChecker.startsWith("Audio", 0)) {
         let lines = textChecker.split("\n");
-        lines.forEach(function(line) {
+        lines.every(function(line) {
             var lower = line.toLowerCase();
-            var data = line.substring(line.indexOf(":" + 2);
+            var data = line.substring(line.indexOf(":") + 2);
             if (lower.includes("intro")) {
               audioIntro = data;
             }
             //outro is always last one
             else if (lower.includes("outro")) {
               audioOutro = data;
-              return;
+              // stop processing after this
+              return false;
             } else {
               audioInter.push(data);
             }
+            return true;
         });
       }
     });
@@ -97,7 +98,7 @@ var scrapeEpisodeData=function(){
     clipboardText = "__NOTOC__";
     clipboardText += "{{Episode Infobox\n\n";
     clipboardText += "| epnumber=" + epNumber + "\n\n";
-    clipboardText += "| title1=" + epTitle + "\n\n";
+    clipboardText += "| title1=" + episodeTitle + "\n\n";
     clipboardText += "| infopage=" + window.location.href + "\n\n";
     clipboardText += "| mp3download=" + directLink + "\n\n";
     clipboardText += "| date=" + episodeDate + "\n\n";
