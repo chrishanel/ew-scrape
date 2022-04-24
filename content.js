@@ -1,5 +1,9 @@
 var scrapeEpisodeData=function(){
 
+    function straightenQuotes(s) {
+        return s.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"');
+    }
+
     let linkCollect = new Array;
     let descriptionCollect = new String;
     let audioIntro = new String;
@@ -20,7 +24,7 @@ var scrapeEpisodeData=function(){
 
     //episode link
     let titleDiv = $('.posttitle').first();
-    episodeTitle = titleDiv.text();
+    episodeTitle = straightenQuotes(titleDiv.text());
     let epLinkText = "*[" + window.location.href + " " + episodeTitle + "]\n"
     linkCollect.push(epLinkText);
     
@@ -30,7 +34,7 @@ var scrapeEpisodeData=function(){
     directLink = $('.powerpress_link_d').attr('href');
 
     //cycle through post and grab data we care about
-    $('.fullpostentry').find('p').each(function( index ) {
+    $('.fullpostentry').children('p').each(function( index ) {
       let textChecker = $(this).text();
 
       if (index == 0 ) {
@@ -38,7 +42,7 @@ var scrapeEpisodeData=function(){
         if (descriptRaw.startsWith("\n", 0)) {
           descriptRaw = descriptRaw.substring(1);
         }
-        descriptionCollect = descriptRaw;
+        descriptionCollect = straightenQuotes(descriptRaw);
       }
 
       else if (textChecker.startsWith("Link", 1)) {
@@ -46,7 +50,7 @@ var scrapeEpisodeData=function(){
           let linkHref = $(this).attr('href');
           let linkText = $(this).text();
 
-          let newLink = "*[" + linkHref + " " + linkText + "]\n"
+          let newLink = "*[" + linkHref + " " + straightenQuotes(linkText) + "]\n"
 
           linkCollect.push(newLink);
         });
@@ -56,7 +60,7 @@ var scrapeEpisodeData=function(){
         let lines = textChecker.split("\n");
         lines.every(function(line) {
             var lower = line.toLowerCase();
-            var data = line.substring(line.indexOf(":") + 2);
+            var data = straightenQuotes(line.substring(line.indexOf(":") + 2));
             if (lower.includes("intro")) {
               audioIntro = data;
             }
