@@ -42,6 +42,7 @@ var scrapeEpisodeData=function(){
         if (descriptRaw.startsWith("\n", 0)) {
           descriptRaw = descriptRaw.substring(1);
         }
+        descriptRaw = descriptRaw.replace(/\(([\d:]+)\)/g, function (match, time) { return "({{{tcl|tc=" + time + "}}})"; });
         descriptionCollect = straightenQuotes(descriptRaw);
       }
 
