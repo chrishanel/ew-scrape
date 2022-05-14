@@ -16,6 +16,7 @@ var scrapeEpisodeData=function(){
     let episodeDate = new String;
     let clipboardText = new String;
     let directLink = new String;
+    let hosts = new String;
 
     //get episode Date
     let dateDiv = $('.postmeta').find('div').last();
@@ -38,11 +39,40 @@ var scrapeEpisodeData=function(){
       let textChecker = $(this).text();
 
       if (index == 0 ) {
-        let descriptRaw = $(this).text();
+        // Make a copy so we can fiddle with it
+        var copy = this.cloneNode(true);
+        // Wikify all the links
+        $(copy).find('a').each(function (index) {
+            if (this.href.startsWith("https://www.fangraphs.com/players/")) {
+                this.insertAdjacentText("beforebegin", "[[");
+                this.insertAdjacentText("afterend", "]]");
+            } else {
+                this.insertAdjacentText("beforebegin", "[" + this.href + " ");
+                this.insertAdjacentText("afterend", "]");
+            }
+        });
+
+        // Preserve italics
+        $(copy).find('em').each(function (index) {
+            this.insertAdjacentText("beforebegin", "''");
+            this.insertAdjacentText("afterend", "''");
+        });
+
+        let descriptRaw = $(copy).text();
         if (descriptRaw.startsWith("\n", 0)) {
           descriptRaw = descriptRaw.substring(1);
         }
+        descriptRaw = descriptRaw.replace(/\((\d+:[\d:]+)\)/g, function (match, time) { return "({{tcl|tc=" + time + "}})"; });
         descriptionCollect = straightenQuotes(descriptRaw);
+
+        if (descriptRaw.startsWith("Ben Lindbergh and Meg Rowley")) {
+            // Alternate the order of the hosts
+            if (epNumber % 2 == 0) {
+                hosts = "[[Ben Lindbergh]]<br>[[Meg Rowley]]";
+            } else {
+                hosts = "[[Meg Rowley]]<br>[[Ben Lindbergh]]";
+            }
+        }
       }
 
       else if (textChecker.startsWith("Link", 1)) {
@@ -107,7 +137,7 @@ var scrapeEpisodeData=function(){
     clipboardText += "| mp3download=" + directLink + "\n\n";
     clipboardText += "| date=" + episodeDate + "\n\n";
     clipboardText += "| duration=\n\n"; //TO DO: ADD DURATION
-    clipboardText += "| hosts=\n\n"; //TO DO: ADD HOSTS
+    clipboardText += "| hosts=" + hosts + "\n\n"; //TO DO: ADD HOSTS
     clipboardText += "| intro=[" + audioIntroLink + " " + audioIntro + "]\n\n";
     //interstitials are funky
     if (audioInter.length > 0) {
@@ -138,7 +168,7 @@ var scrapeEpisodeData=function(){
                   "==Stat Blast==\n* {For STAT BLAST segment: " +
                   "transcribe the scenario that the host is trying " +
                   "to answer (you do NOT have to transcribe the method used " +
-                  "within the Stat Blast, but note its findings and andy other " +
+                  "within the Stat Blast, but note its findings and any other " +
                   "pertinent info.)}\n\n" +
                   "==Notes==\n* {List noteworthy tangents, quotes, " +
                   "highlights, miscellany not covered above.}\n\n" +
