@@ -4,6 +4,28 @@ var scrapeEpisodeData=function(){
         return s.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"');
     }
 
+    function wikify(node) {
+        // Make a copy so we can fiddle with it
+        var copy = node.cloneNode(true);
+        // Wikify all the links
+        $(copy).find('a').each(function (index) {
+            if (this.href.startsWith("https://www.fangraphs.com/players/")) {
+                this.insertAdjacentText("beforebegin", "[[");
+                this.insertAdjacentText("afterend", "]]");
+            } else {
+                this.insertAdjacentText("beforebegin", "[" + this.href + " ");
+                this.insertAdjacentText("afterend", "]");
+            }
+        });
+
+        // Preserve italics
+        $(copy).find('em').each(function (index) {
+            this.insertAdjacentText("beforebegin", "''");
+            this.insertAdjacentText("afterend", "''");
+        });
+        return straightenQuotes($(copy).text());
+    }
+
     let linkCollect = new Array;
     let descriptionCollect = new String;
     let audioIntro = new String;
@@ -39,31 +61,12 @@ var scrapeEpisodeData=function(){
       let textChecker = $(this).text();
 
       if (index == 0 ) {
-        // Make a copy so we can fiddle with it
-        var copy = this.cloneNode(true);
-        // Wikify all the links
-        $(copy).find('a').each(function (index) {
-            if (this.href.startsWith("https://www.fangraphs.com/players/")) {
-                this.insertAdjacentText("beforebegin", "[[");
-                this.insertAdjacentText("afterend", "]]");
-            } else {
-                this.insertAdjacentText("beforebegin", "[" + this.href + " ");
-                this.insertAdjacentText("afterend", "]");
-            }
-        });
-
-        // Preserve italics
-        $(copy).find('em').each(function (index) {
-            this.insertAdjacentText("beforebegin", "''");
-            this.insertAdjacentText("afterend", "''");
-        });
-
-        let descriptRaw = $(copy).text();
+        let descriptRaw = wikify(this);
         if (descriptRaw.startsWith("\n", 0)) {
           descriptRaw = descriptRaw.substring(1);
         }
         descriptRaw = descriptRaw.replace(/\((\d+:[\d:]+)\)/g, function (match, time) { return "({{tcl|tc=" + time + "}})"; });
-        descriptionCollect = straightenQuotes(descriptRaw);
+        descriptionCollect = descriptRaw;
 
         if (descriptRaw.startsWith("Ben Lindbergh and Meg Rowley")) {
             // Alternate the order of the hosts
@@ -76,21 +79,18 @@ var scrapeEpisodeData=function(){
       }
 
       else if (textChecker.startsWith("Link", 1)) {
-        $(this).find('a').each(function() {
-          let linkHref = $(this).attr('href');
-          let linkText = $(this).text();
-
-          let newLink = "*[" + linkHref + " " + straightenQuotes(linkText) + "]\n"
-
-          linkCollect.push(newLink);
+        let lines = wikify(this).split("\n");
+        lines.forEach(function(line) {
+            line && linkCollect.push("*" + line + "\n");
         });
       }
 
       else if ( textChecker.startsWith("Audio", 0)) {
-        let lines = textChecker.split("\n");
+        let text = wikify(this);
+        let lines = text.split("\n");
         lines.every(function(line) {
             var lower = line.toLowerCase();
-            var data = straightenQuotes(line.substring(line.indexOf(":") + 2));
+            var data = line.substring(line.indexOf(":") + 2);
             if (lower.includes("intro")) {
               audioIntro = data;
             }
@@ -99,33 +99,11 @@ var scrapeEpisodeData=function(){
               audioOutro = data;
               // stop processing after this
               return false;
-            } else {
+            } else if (lower) {
               audioInter.push(data);
             }
             return true;
         });
-      }
-    });
-
-    $('.fullpostentry').find('strong').each(function( index ) {
-
-      let strongText = $(this).text();
-      let potentialLink = $(this).next('a');
-
-      console.log(strongText);
-
-      if (strongText.startsWith("intr", 6)) {
-        console.log('intro');
-        audioIntroLink = potentialLink.attr('href');
-      }
-
-      else if (strongText.startsWith("inte", 6)) {
-        audioInterLinks.push( potentialLink.attr('href'));
-      }
-
-      else if (strongText.startsWith("outro", 6)) {
-        console.log('outro');
-        audioOutroLink = potentialLink.attr('href');
       }
     });
 
@@ -138,17 +116,13 @@ var scrapeEpisodeData=function(){
     clipboardText += "| date=" + episodeDate + "\n\n";
     clipboardText += "| duration=\n\n"; //TO DO: ADD DURATION
     clipboardText += "| hosts=" + hosts + "\n\n"; //TO DO: ADD HOSTS
-    clipboardText += "| intro=[" + audioIntroLink + " " + audioIntro + "]\n\n";
-    //interstitials are funky
+    clipboardText += "| intro=" + audioIntro + "\n\n";
+
     if (audioInter.length > 0) {
-      clipboardText += "| interstitials=";
-      jQuery.each(audioInter, function( index ) {
-        clipboardText += "[" + audioInterLinks[index] + " ";
-        clipboardText += this + "]<br>";
-      });
-      clipboardText += "\n\n";
+      clipboardText += "| interstitials=" + audioInter.join("<br>") + "\n\n";
     }
-    clipboardText += "| outro=[" + audioOutroLink + " " + audioOutro + "]\n\n}}";
+
+    clipboardText += "| outro=" + audioOutro + "\n\n}}";
     clipboardText += "{{#vardefine:downloadlink|" + directLink + "}}";
     clipboardText += "{{IncompleteNotice}}\n";
     clipboardText += "==Summary==\n\'\'";
