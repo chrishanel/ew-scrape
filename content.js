@@ -9,7 +9,8 @@ var scrapeEpisodeData=function(){
         var copy = node.cloneNode(true);
         // Wikify all the links
         $(copy).find('a').each(function (index) {
-            if (this.href.startsWith("https://www.fangraphs.com/players/")) {
+            if (this.href.startsWith("https://www.fangraphs.com/players/") ||
+                this.href.startsWith("http://www.fangraphs.com/statss.aspx?playerid=")) {
                 this.insertAdjacentText("beforebegin", "[[");
                 this.insertAdjacentText("afterend", "]]");
             } else {
@@ -23,7 +24,9 @@ var scrapeEpisodeData=function(){
             this.insertAdjacentText("beforebegin", "''");
             this.insertAdjacentText("afterend", "''");
         });
-        return straightenQuotes($(copy).text());
+        var result = straightenQuotes($(copy).text());
+        result = result.replace(/']]/g, "]]'");
+        return result;
     }
 
     let linkCollect = new Array;
@@ -78,7 +81,7 @@ var scrapeEpisodeData=function(){
         }
       }
 
-      else if (textChecker.startsWith("Link", 1)) {
+      else if (textChecker.startsWith("Link", 1) || textChecker.startsWith("Link", 0)) {
         let lines = wikify(this).split("\n");
         lines.forEach(function(line) {
             line && linkCollect.push("*" + line + "\n");
