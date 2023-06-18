@@ -26,6 +26,21 @@ var scrapeEpisodeData=function(){
         });
         var result = straightenQuotes($(copy).text());
         result = result.replace(/']]/g, "]]'");
+
+        // Convert intrawiki links
+        result = result.replace(/\[https:\/\/effectivelywild\.fandom\.com\/wiki\/(\S+) (.*)\]/g,
+            function (_, p1, p2) {
+                p1 = p1.replaceAll('_', ' ');
+                return "[[" + p1 + "|" + p2 + "]]";
+            });
+
+       // Convert Wikipedia links
+        result = result.replace(/\[https:\/\/en\.wikipedia\.org\/wiki\/(\S+) (.*)\]/g,
+            function (_, p1, p2) {
+                p1 = p1.replaceAll('_', ' ');
+                return "{{W|" + p1 + "|" + p2 + "}}";
+            });
+
         return result;
     }
 
@@ -54,6 +69,7 @@ var scrapeEpisodeData=function(){
     let epLinkText = "*[" + window.location.href + " " + episodeTitle + "]\n"
     linkCollect.push(epLinkText);
     
+    episodeTitle = episodeTitle.replace("Effectively Wild Episode", "Episode");
     let epNumber = episodeTitle.substring(episodeTitle.indexOf("Episode") + 8, episodeTitle.indexOf(":"));
 
     //direct download to mp3
